@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ananthe Band | Music Reactive</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Poppins',sans-serif; overflow-x:hidden; background:#111; color:#f5f5f5;}
+  canvas#bgCanvas { position: fixed; top:0; left:0; z-index:-1; }
+  header { text-align:center; padding:80px 20px 40px; position: relative; z-index:1; }
+  header h1 { font-size:3rem; background: linear-gradient(45deg,#ff4757,#ff6b81,#ffa502); -webkit-background-clip:text; -webkit-text-fill-color:transparent; animation: glow 2s infinite alternate;}
+  @keyframes glow { from { text-shadow:0 0 10px #ff4757;} to { text-shadow:0 0 25px #ffa502;}}
+  header p{ font-size:1.2rem; margin-top:10px; opacity:0.8;}
+  nav { display:flex; justify-content:center; gap:20px; padding:15px; background:rgba(0,0,0,0.4); backdrop-filter:blur(8px); position:sticky; top:0; z-index:10;}
+  nav a { color:#fff; text-decoration:none; font-weight:bold; padding:8px 15px; border-radius:6px; transition:background 0.3s; }
+  nav a:hover { background: rgba(255,255,255,0.15); }
+  section { padding:60px 20px; text-align:center; position: relative; z-index:1; }
+  section h2 { font-size:2.2rem; margin-bottom:25px; color:#ff6b81; }
+  .content-box { max-width:900px; margin:auto; background:rgba(255,255,255,0.05); padding:30px; border-radius:16px; backdrop-filter:blur(10px); box-shadow:0 8px 25px rgba(0,0,0,0.6); transition: transform 0.3s; }
+  .content-box:hover { transform:translateY(-5px);}
+  audio, iframe, img { width:100%; border-radius:12px; margin:15px 0; }
+  .btn { display:inline-block; margin:10px; padding:12px 25px; background: linear-gradient(45deg,#ff4757,#ffa502); color:white; text-decoration:none; border-radius:8px; font-weight:bold; transition:transform 0.3s, opacity 0.3s;}
+  .btn:hover { transform:scale(1.05); opacity:0.9; }
+  footer { background:rgba(0,0,0,0.4); text-align:center; padding:20px; margin-top:40px; font-size:0.9rem; position:relative; z-index:1;}
+  @media(max-width:768px){ header h1{ font-size:2rem;} nav{ flex-direction:column;} nav a{ margin:5px 0;} iframe{ height:220px;} }
+</style>
+</head>
+<body>
+<canvas id="bgCanvas"></canvas>
+
+<header>
+<h1>🎶 Ananthe Band 🎶</h1>
+<p>Feel the Rhythm, Live the Music</p>
+</header>
+
+<nav>
+  <a href="#songs">Songs</a>
+  <a href="#events">Events</a>
+  <a href="#other">Other</a>
+        <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+     </nav>
+
+</nav>
+
+<section id="songs">
+  <h2>Our Songs</h2>
+  <div class="content-box">
+    <p>🎵 Dreams of Fire</p>
+    <audio id="song1" controls>
+      <source src="song1.mp3" type="audio/mpeg">
+    </audio>
+
+    <p>🎵 Eternal Vibe</p>
+    <audio id="song2" controls>
+      <source src="song2.mp3" type="audio/mpeg">
+    </audio>
+
+    <p>🎵 Nightfall</p>
+    <audio id="song3" controls>
+      <source src="song3.mp3" type="audio/mpeg">
+    </audio>
+
+    <h3>🎥 Watch Our Music Video</h3>
+    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+  </div>
+</section>
+
+<section id="events">
+  <h2>Upcoming Events</h2>
+  <div class="content-box">
+    <h3>📅 Colombo – October 2025</h3>
+    <img src="event1.jpg" alt="Colombo Event Poster">
+    <h3>📅 Kandy – November 2025</h3>
+    <img src="event2.jpg" alt="Kandy Event Poster">
+    <h3>📅 Galle – December 2025</h3>
+    <img src="event3.jpg" alt="Galle Event Poster">
+  </div>
+</section>
+
+<section id="other">
+  <h2>Other</h2>
+  <div class="content-box">
+    <p>🎤 Merchandise, Collabs, Media & more…</p>
+    <a href="#" class="btn">Buy Merchandise</a>
+    <a href="#" class="btn">Contact Us</a>
+  </div>
+</section>
+
+<footer>
+  <p>© 2025 Ananthe Band  | All Rights Reserved</p>
+</footer>
+
+
+<script>
+const canvas = document.getElementById('bgCanvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+function resizeCanvas(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+class Star {
+  constructor(){ this.reset(); }
+  reset(){ this.x=Math.random()*canvas.width; this.y=Math.random()*canvas.height; this.size=Math.random()*2+0.5; this.speed=Math.random()*0.5+0.2; this.baseSize=this.size; }
+  update(vol){
+    this.y -= this.speed + vol*5;
+    if(this.y<0) this.y = canvas.height;
+    this.size = this.baseSize + vol*3;
+  }
+  draw(){ ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2); ctx.fillStyle="#fff"; ctx.fill(); }
+}
+for(let i=0;i<200;i++) stars.push(new Star());
+
+const audios = [document.getElementById('song1'), document.getElementById('song2'), document.getElementById('song3')];
+let audioCtx, analyser, dataArray, source;
+
+function setupAudio(audio){
+  if(audioCtx) audioCtx.close();
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  analyser = audioCtx.createAnalyser();
+  source = audioCtx.createMediaElementSource(audio);
+  source.connect(analyser);
+  analyser.connect(audioCtx.destination);
+  analyser.fftSize = 256;
+  dataArray = new Uint8Array(analyser.frequencyBinCount);
+}
+
+audios.forEach(a => {
+  a.addEventListener('play', ()=>{ setupAudio(a); });
+});
+
+function animate(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  let vol = 0;
+  if(analyser){
+    analyser.getByteFrequencyData(dataArray);
+    vol = dataArray.reduce((a,b)=>a+b,0)/dataArray.length/50; // normalize
+  }
+  stars.forEach(s => { s.update(vol); s.draw(); });
+  requestAnimationFrame(animate);
+}
+animate();
+</script>
+</body>
+</html>
